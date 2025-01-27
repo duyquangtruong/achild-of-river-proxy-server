@@ -4,8 +4,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const connectDB = require("./config/db");
+
 var indexRouter = require('./routes/index');
-var greetingRouter = require('./routes/greeting');
+var imageObjRouter = require('./routes/imageObj');
+
+require('dotenv').config();
+const port = process.env.PORT;
 
 var app = express();
 
@@ -19,8 +24,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Connect to MongoDB
+connectDB();
+
 app.use('/', indexRouter);
-app.use('/greeting', greetingRouter);
+app.use("/api/items", imageObjRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
