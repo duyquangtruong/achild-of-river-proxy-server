@@ -1,4 +1,4 @@
-const ImageObjService = require("../services/ImageObj.service");
+const ImageObjService = require("../services/imageObj.service");
 
 // Create a new ImageObj
 const createImageObj = async (req, res) => {

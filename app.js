@@ -9,6 +9,7 @@ const connectDB = require("./config/db");
 
 var indexRouter = require('./routes/index');
 var imageObjRouter = require('./routes/imageObj');
+var projectRouter = require('./routes/project');
 
 var app = express();
 app.use(cors());
@@ -27,7 +28,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 connectDB();
 
 app.use('/', indexRouter);
-app.use("/api/items", imageObjRouter);
+app.use("/api/images", imageObjRouter);
+app.use("/api/projects", projectRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
