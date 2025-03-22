@@ -2,11 +2,11 @@ const Project = require("../model/project.model");
 
 const createProject = async (data) => {
     const newProject = new Project(data);
-    return await newProject.save();
+    return newProject.save();
 };
 
 const getAllProjectIndex = async () => {
-    return await Project.aggregate([
+    return Project.aggregate([
         {
             $project: {
                 name: 1,
@@ -19,11 +19,11 @@ const getAllProjectIndex = async () => {
 };
 
 const getProjectDetail = async (nameId) => {
-    return await Project.findOne({ nameId: nameId });
+    return Project.findOne({ nameId: nameId });
 };
 
 const updateProject = async (nameId, updateData) => {
-    return await Project.findOneAndUpdate(
+    return Project.findOneAndUpdate(
         { nameId: nameId }, // Find by nameId
         { $set: updateData }, // Update fields
         { new: true } // Return the updated document
@@ -31,7 +31,7 @@ const updateProject = async (nameId, updateData) => {
 };
 
 const deleteProject = async (nameId) => {
-    return await Project.findOneAndDelete({ nameId: nameId });
+    return Project.findOneAndDelete({ nameId: nameId });
 };
 
 module.exports = {

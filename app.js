@@ -10,6 +10,7 @@ const connectDB = require("./config/db");
 var indexRouter = require('./routes/index');
 var imageObjRouter = require('./routes/imageObj');
 var projectRouter = require('./routes/project');
+var introMediaRouter = require('./routes/introMedia');
 
 var app = express();
 app.use(cors());
@@ -30,14 +31,15 @@ connectDB();
 app.use('/', indexRouter);
 app.use("/api/images", imageObjRouter);
 app.use("/api/projects", projectRouter);
+app.use("/api/introMedia", introMediaRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
