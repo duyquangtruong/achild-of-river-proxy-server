@@ -11,8 +11,6 @@ const projectSchema = new mongoose.Schema({
   description: { type: String, required: false },
   paragraphs: { type: Array, required: false },
   coverImg: { type: String, required: false },
-  year: { type: Number, required: false },
-  client: { type: String, required: false },
   projectFields: { type: Array, required: false }
 });
 
