@@ -27,12 +27,12 @@ const getProjectDetail = async (nameId) => {
     const prevIndex = index > 1 ? index - 1 : totalProjects;
     const nextIndex = index < totalProjects ? index + 1 : 1;
     const prevProject = index > 1 
-      ? await Project.findOne({ index: prevIndex }).select("name nameId") 
+      ? await Project.findOne({ index: prevIndex }, "name nameId") 
       : null;
 
     // Get next project if the index is less than totalProjects
     const nextProject = index < totalProjects 
-      ? await Project.findOne({ index: nextIndex }).select("name nameId") 
+      ? await Project.findOne({ index: nextIndex }, "name nameId")
       : null;
 
     return {

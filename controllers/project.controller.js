@@ -24,7 +24,7 @@ const getProjectByNameId = async (req, res) => {
     if (!project) return res.status(404).json({ message: `Cannot find project with nameId = ${req.params.nameId} ` });
     res.status(200).json(project);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err });
   }
 };
 
