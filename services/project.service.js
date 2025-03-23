@@ -19,21 +19,18 @@ const getAllProjectIndex = async () => {
 };
 
 const getProjectDetail = async (nameId) => {
-    const currentProject = Project.findOne({ nameId: nameId });
+    const currentProject = await Project.findOne({ nameId: nameId }).exec();
     const { index } = currentProject;
 
     // Get the total number of projects
     const totalProjects = await Project.countDocuments();
     const prevIndex = index > 1 ? index - 1 : totalProjects;
     const nextIndex = index < totalProjects ? index + 1 : 1;
-    const prevProject = index > 1 
-      ? await Project.findOne({ index: prevIndex }, "name nameId") 
-      : null;
+
+    const prevProject = await Project.findOne({ index: prevIndex }).select("name nameId").exec();
 
     // Get next project if the index is less than totalProjects
-    const nextProject = index < totalProjects 
-      ? await Project.findOne({ index: nextIndex }, "name nameId")
-      : null;
+    const nextProject = await Project.findOne({ index: nextIndex }).select("name nameId").exec();
 
     return {
         current: currentProject,
