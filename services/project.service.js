@@ -14,6 +14,9 @@ const getAllProjectIndex = async () => {
                 index: 1,
                 firstSlider3Item: { $arrayElemAt: ["$slider3", 0] } // Get first item of slider3
             }
+        },
+        {
+            $sort: { index: 1 } // Sort by index in ascending order
         }
     ]);
 };
