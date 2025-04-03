@@ -11,6 +11,7 @@ var indexRouter = require('./routes/index');
 var imageObjRouter = require('./routes/imageObj');
 var projectRouter = require('./routes/project');
 var introMediaRouter = require('./routes/introMedia');
+var personalRouter = require('./routes/personal');
 
 var app = express();
 app.use(cors());
@@ -32,6 +33,7 @@ app.use('/', indexRouter);
 app.use("/api/images", imageObjRouter);
 app.use("/api/projects", projectRouter);
 app.use("/api/introMedia", introMediaRouter);
+app.use("/api/personal", personalRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
