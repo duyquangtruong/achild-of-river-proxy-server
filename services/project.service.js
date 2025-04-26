@@ -1,4 +1,11 @@
+import axios from 'axios';
+import base64 from 'base-64';
+
 const Project = require("../model/project.model");
+
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
 const createProject = async (data) => {
     const newProject = new Project(data);
@@ -40,6 +47,26 @@ const getProjectDetail = async (nameId) => {
         previous: prevProject,
         next: nextProject,
     }
+};
+
+const getProjectImages = async (folderName) => {
+    const auth = base64.encode(`${apiKey}:${apiSecret}`);
+
+    axios.get(`https://api.cloudinary.com/v1_1/${cloudName}/resources/image`, {
+        headers: {
+            Authorization: `Basic ${auth}`,
+        },
+        params: {
+            prefix: `${folderName}/`,
+            type: 'upload',
+        },
+    })
+        .then(res => {
+            console.log('Images:', res.data.resources);
+        })
+        .catch(err => {
+            console.error(err);
+        });
 };
 
 const updateProject = async (nameId, updateData) => {

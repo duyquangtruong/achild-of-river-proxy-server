@@ -28,6 +28,16 @@ const getProjectByNameId = async (req, res) => {
   }
 };
 
+const getProjectImagesByNameId = async (req, res) => {
+  try {
+    const project = await projectService.getProjectDetail(req.params.nameId);
+    if (!project) return res.status(404).json({ message: `Cannot find project with nameId = ${req.params.nameId} ` });
+    res.status(200).json(project);
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
+};
+
 const updateProject = async (req, res) => {
   try {
     const updatedProject = await projectService.updateProject(req.params.nameId, req.body);
@@ -52,6 +62,7 @@ module.exports = {
   createProject,
   getAllProjectIndex,
   getProjectByNameId,
+  getProjectImagesByNameId,
   updateProject,
   deleteProject
 };
