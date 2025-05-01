@@ -10,7 +10,7 @@ const projectSchema = new mongoose.Schema({
   title: { type: String, required: false },
   description: { type: String, required: false },
   paragraphs: { type: Array, required: false },
-  coverImg: { type: String, required: false },
+  coverImg: { type: Array, required: false },
   projectFields: { type: Array, required: false }
 });
 
