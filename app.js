@@ -8,7 +8,6 @@ var cors = require('cors')
 const connectDB = require("./config/db");
 
 var indexRouter = require('./routes/index');
-var imageObjRouter = require('./routes/imageObj');
 var projectRouter = require('./routes/project');
 var introMediaRouter = require('./routes/introMedia');
 var personalRouter = require('./routes/personal');
