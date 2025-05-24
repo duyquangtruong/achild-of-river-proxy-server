@@ -30,7 +30,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 connectDB();
 
 app.use('/', indexRouter);
-app.use("/api/images", imageObjRouter);
 app.use("/api/projects", projectRouter);
 app.use("/api/introMedia", introMediaRouter);
 app.use("/api/personal", personalRouter);
