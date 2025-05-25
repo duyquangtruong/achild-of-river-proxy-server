@@ -10,6 +10,7 @@ const connectDB = require("./config/db");
 var indexRouter = require('./routes/index');
 var projectRouter = require('./routes/project');
 var introMediaRouter = require('./routes/introMedia');
+var introMediaMobileRouter = require('./routes/introMediaMobile');
 var personalRouter = require('./routes/personal');
 
 var app = express();
@@ -31,6 +32,7 @@ connectDB();
 app.use('/', indexRouter);
 app.use("/api/projects", projectRouter);
 app.use("/api/introMedia", introMediaRouter);
+app.use("/api/introMediaMobile", introMediaMobileRouter);
 app.use("/api/personal", personalRouter);
 
 // catch 404 and forward to error handler
