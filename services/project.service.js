@@ -12,7 +12,8 @@ const getAllProjectIndex = async () => {
                 name: 1,
                 nameId: 1,
                 index: 1,
-                firstSlider3Item: { $arrayElemAt: ["$slider3", 0] } // Get first item of slider3
+                firstSlider3Item: { $arrayElemAt: ["$slider3", 0] }, // Get first item of slider3
+                mobileIndexImg: 1
             }
         },
         {
