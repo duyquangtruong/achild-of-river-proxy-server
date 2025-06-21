@@ -3,6 +3,7 @@ const introMediaController = require("../controllers/introMedia.controller");
 const router = express.Router();
 
 router.get("/", introMediaController.getAllIntroMedia);
+router.get("/all", introMediaController.getAllIntroMediaBothDevice);
 router.post("/", introMediaController.createIntroMedia);
 router.put("/:id", introMediaController.updateIntroMedia);
 router.delete("/:id", introMediaController.deleteIntroMedia);

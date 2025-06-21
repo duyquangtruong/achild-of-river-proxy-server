@@ -2,12 +2,26 @@ const introMediaService = require("../services/introMedia.service");
 
 const getAllIntroMedia = async (req, res) => {
     try {
-        const projects = await introMediaService.getAllIntroMedia();
+        const projects = await introMediaService.getAllIntroMediaDesktop();
         res.status(200).json(projects);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
+const getAllIntroMediaBothDevice = async (req, res) => {
+    try {
+        const projectsDesktop = await introMediaService.getAllIntroMediaDesktop();
+        const projectsMobile = await introMediaService.getAllIntroMediaMobile();
+        res.status(200).json({
+            desktop: projectsDesktop,
+            mobile: projectsMobile
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 
 const createIntroMedia = async (req, res) => {
     try {
@@ -40,6 +54,7 @@ const deleteIntroMedia = async (req, res) => {
 
 module.exports = {
     getAllIntroMedia,
+    getAllIntroMediaBothDevice,
     createIntroMedia,
     updateIntroMedia,
     deleteIntroMedia
