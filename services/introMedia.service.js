@@ -4,7 +4,7 @@ const Project = require("../model/project.model");
 const getAllIntroMediaDesktop = async () => {
     return Project.find(
         {
-            desktopIntroImg: { $ne: null, $ne: "" } // not null and not empty
+            desktopIntroImg: { $ne: null, $ne: "", $ne: undefined } // not null and not empty
         },
         {
             desktopIntroImg: 1,
