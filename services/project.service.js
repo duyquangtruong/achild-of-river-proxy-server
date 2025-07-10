@@ -8,18 +8,23 @@ const createProject = async (data) => {
 const getAllProjectIndex = async () => {
     return Project.aggregate([
         {
-            $project: {
-                name: 1,
-                nameId: 1,
-                index: 1,
-                firstSlider3Item: { $arrayElemAt: ["$slider3", 0] }, // Get first item of slider3
-                mobileIndexImg: 1
-            }
+          $match: {
+            isEnabled: true
+          }
         },
         {
-            $sort: { index: 1 } // Sort by index in ascending order
+          $project: {
+            name: 1,
+            nameId: 1,
+            index: 1,
+            firstSlider3Item: { $arrayElemAt: ["$slider3", 0] },
+            mobileIndexImg: 1
+          }
+        },
+        {
+          $sort: { index: 1 }
         }
-    ]);
+      ]);
 };
 
 const getProjectDetail = async (nameId) => {

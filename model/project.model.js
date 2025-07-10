@@ -12,7 +12,9 @@ const projectSchema = new mongoose.Schema({
   paragraphs: { type: Array, required: false },
   coverImg: { type: Array, required: false },
   mobileIndexImg: { type: String, required: false },
-  projectFields: { type: Array, required: false }
+  desktopIntroImg: { type: String, required: false },
+  projectFields: { type: Array, required: false },
+  isEnabled: { type: Boolean, default: true }
 });
 
 const Project = mongoose.model("Project", projectSchema);

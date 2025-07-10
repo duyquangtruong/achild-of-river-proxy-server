@@ -2,14 +2,28 @@ const IntroMedia = require("../model/introMedia.model");
 const Project = require("../model/project.model");
 
 const getAllIntroMediaDesktop = async () => {
-    return IntroMedia.find({});
+    return Project.find(
+        {
+            desktopIntroImg: { $ne: null, $ne: "" } // not null and not empty
+        },
+        {
+            desktopIntroImg: 1,
+            index: 1,
+            _id: 0
+        }
+    ).sort({ index: 1 });
 };
 const getAllIntroMediaMobile = async () => {
-    return Project.find({}, {
-        mobileIndexImg: 1,
-        index: 1,
-        _id: 0
-    }).sort({ index: 1 }); // ascending order  
+    return Project.find(
+        {
+          mobileIndexImg: { $ne: null, $ne: "" } // not null and not empty
+        },
+        {
+          mobileIndexImg: 1,
+          index: 1,
+          _id: 0
+        }
+      ).sort({ index: 1 }); // ascending order
 };
 
 const createIntroMedia = async (data) => {
