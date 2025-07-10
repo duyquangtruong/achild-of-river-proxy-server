@@ -18,6 +18,15 @@ const getAllProjectIndex = async (req, res) => {
   }
 };
 
+const getAllEnabledProjectIndex = async (req, res) => {
+  try {
+    const projects = await projectService.getAllEnabledProjectIndex();
+    res.status(200).json(projects);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 const getProjectByNameId = async (req, res) => {
   try {
     const project = await projectService.getProjectDetail(req.params.nameId);
@@ -61,6 +70,7 @@ const deleteProject = async (req, res) => {
 module.exports = {
   createProject,
   getAllProjectIndex,
+  getAllEnabledProjectIndex,
   getProjectByNameId,
   getProjectImagesByNameId,
   updateProject,

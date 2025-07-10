@@ -5,13 +5,30 @@ const createProject = async (data) => {
     return newProject.save();
 };
 
-const getAllProjectIndex = async () => {
+const getAllEnabledProjectIndex = async () => {
     return Project.aggregate([
         {
           $match: {
             isEnabled: true
           }
         },
+        {
+          $project: {
+            name: 1,
+            nameId: 1,
+            index: 1,
+            firstSlider3Item: { $arrayElemAt: ["$slider3", 0] },
+            mobileIndexImg: 1
+          }
+        },
+        {
+          $sort: { index: 1 }
+        }
+      ]);
+};
+
+const getAllProjectIndex = async () => {
+    return Project.aggregate([        
         {
           $project: {
             name: 1,
@@ -63,6 +80,7 @@ const deleteProject = async (nameId) => {
 module.exports = {
     createProject,
     getAllProjectIndex,
+    getAllEnabledProjectIndex,
     getProjectDetail,
     updateProject,
     deleteProject
