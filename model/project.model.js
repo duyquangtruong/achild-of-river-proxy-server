@@ -3,14 +3,17 @@ const mongoose = require("mongoose");
 const projectFieldSchema = new mongoose.Schema({
   title: { type: String, required: false },
   content: { type: [String], default: [] },
-  link: {
-    type: String,
-    required: false,
-    trim: true,
-    validate: {
-      validator: (v) => !v || /^https?:\/\//i.test(v),
-      message: (props) => `Invalid project field link "${props.value}". It must start with http:// or https://`
-    }
+  // Optional, aligned with `content` by index. "" means content[i] is plain text.
+  links: {
+    type: [{
+      type: String,
+      trim: true,
+      validate: {
+        validator: (v) => v === "" || /^https?:\/\//i.test(v),
+        message: (props) => `Invalid project field link "${props.value}". It must be empty or start with http:// or https://`
+      }
+    }],
+    default: undefined
   }
 }, { _id: false });
 
@@ -27,7 +30,14 @@ const projectSchema = new mongoose.Schema({
   coverImg: { type: Array, required: false },
   mobileIndexImg: { type: String, required: false },
   desktopIntroImg: { type: String, required: false },
-  projectFields: { type: [projectFieldSchema], required: false },
+  projectFields: {
+    type: [projectFieldSchema],
+    required: false,
+    validate: {
+      validator: (fields) => (fields || []).every((f) => !f.links || f.links.length <= (f.content || []).length),
+      message: "Project field links cannot be longer than its content"
+    }
+  },
   isEnabled: { type: Boolean, default: true }
 });
 
