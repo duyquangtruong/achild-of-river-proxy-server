@@ -1,5 +1,19 @@
 const mongoose = require("mongoose");
 
+const projectFieldSchema = new mongoose.Schema({
+  title: { type: String, required: false },
+  content: { type: [String], default: [] },
+  link: {
+    type: String,
+    required: false,
+    trim: true,
+    validate: {
+      validator: (v) => !v || /^https?:\/\//i.test(v),
+      message: (props) => `Invalid project field link "${props.value}". It must start with http:// or https://`
+    }
+  }
+}, { _id: false });
+
 const projectSchema = new mongoose.Schema({
   name: { type: String, required: true },
   nameId: { type: String, required: true },
@@ -13,7 +27,7 @@ const projectSchema = new mongoose.Schema({
   coverImg: { type: Array, required: false },
   mobileIndexImg: { type: String, required: false },
   desktopIntroImg: { type: String, required: false },
-  projectFields: { type: Array, required: false },
+  projectFields: { type: [projectFieldSchema], required: false },
   isEnabled: { type: Boolean, default: true }
 });
 
