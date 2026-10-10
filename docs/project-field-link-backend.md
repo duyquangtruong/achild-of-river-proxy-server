@@ -1,95 +1,140 @@
-# Add optional `link` to project fields
+# Backend task: add per-value `links` to project fields
 
-## Context
+> This document is for the **backend / proxy server repo** (the service behind `PROXY_ENDPOINT`, currently `https://achild-of-river-proxy-server-ojc6.onrender.com`). The frontend side is already done in `achild-of-river-UI` on branch `feat/project-field-link`.
 
-The frontend (`achild-of-river-UI`) shows each project's `projectFields` as a title/value grid at the bottom of the project detail page. We want a field to be able to link somewhere, for example a "Website" field pointing to the client's site.
+## Goal
 
-The frontend change is already done. If a field has a valid `link`, each of its value lines renders as an `<a>` that opens in a new tab. If it doesn't, the field renders as plain text, the same as today.
+Each project has `projectFields`: a list of credits/info shown as a title/value grid at the bottom of the project detail page. A field can have several values in `content`. We want **each value to be able to link to its own URL**, for example each designer linking to their portfolio.
 
-This document covers the backend side: storing `link` and returning it from the API.
+To do that, add an optional `links: string[]` to each project field, store it, and return it from the project detail API.
 
-## Data contract
+## Current state (checked against the live API)
 
-Each entry in a project's `projectFields` array gets one new **optional** property:
+`GET /api/projects/name/:nameId` returns `{ current, previous, next }`. `current` is the full project document. It includes `__v`, so the backend uses Mongoose. Today a project field looks like this:
 
-| Property  | Type       | Required | Notes                                         |
-|-----------|------------|----------|-----------------------------------------------|
-| `title`   | `string`   | yes      | Existing, unchanged                           |
-| `content` | `string[]` | yes      | Existing, unchanged                           |
-| `link`    | `string`   | **no**   | **New.** Full URL starting with `http://` or `https://` |
+```json
+{ "title": "DESIGNERS", "content": ["Buun Ngo", "Hung Le"] }
+```
+
+Some projects have `"projectFields": []`.
+
+## New data contract
+
+| Property  | Type       | Required | Notes                                           |
+| --------- | ---------- | -------- | ----------------------------------------------- |
+| `title`   | `string`   | yes      | Unchanged                                       |
+| `content` | `string[]` | yes      | Unchanged                                       |
+| `links`   | `string[]` | **no**   | **New.** `links[i]` is the URL for `content[i]` |
 
 Rules:
-- One link per field. If `content` has several lines, all of them link to the same URL.
-- A missing, `null` or empty `link` means plain text.
-- Don't store HTML in `content` or `link`. The frontend renders values as text, so tags would show up literally.
 
-Example project document (only the relevant part):
+1. `links` lines up with `content` **by index**: `links[0]` belongs to `content[0]`, `links[1]` to `content[1]`, and so on.
+2. Each non-empty entry is a full URL starting with `http://` or `https://`.
+3. An empty string at position `i` means `content[i]` is plain text. Keep it as `""`, **don't remove it**, or every later link shifts onto the wrong value.
+4. `links` can be missing (whole field is plain text) or shorter than `content` (values past the end are plain text). It must **not** be longer than `content`.
+5. Plain strings only. No HTML in `content` or `links`.
+
+Example:
 
 ```json
 {
-  "nameId": "Buk",
-  "name": "ahalfprice–BÜK",
-  "projectFields": [
-    { "title": "Client", "content": ["ahalfprice"] },
-    { "title": "Website", "content": ["ahalfprice.com"], "link": "https://ahalfprice.com" }
-  ]
+  "title": "DESIGNERS",
+  "content": ["Buun Ngo", "Hung Le"],
+  "links": ["https://example.com/buun-ngo", ""]
 }
 ```
 
-## Endpoint affected
+"Buun Ngo" renders as a link and "Hung Le" stays plain text.
 
-`GET /api/projects/name/:nameId` returns `{ previous, current, next }`. The frontend reads `current.projectFields[].link`.
+## Implementation steps
 
-`GET /api/projects/enabled` (the index list) is **not** affected and doesn't need to return `projectFields`.
+### 1. Find the relevant code
 
-## Changes
+Search the repo for:
 
-### 1. Schema / model
-If the project model defines `projectFields` with a schema (for example Mongoose), add `link` to the field sub-schema. Otherwise saves may silently drop it.
+- the project model/schema: `mongoose.model(`, `Schema(`, `projectFields`
+- the detail route: `/api/projects/name`, `nameId`
+- any admin/create/update routes for projects: `router.post`, `router.put`, `router.patch`, `findOneAndUpdate`, `updateOne`
+
+### 2. Update the Mongoose schema
+
+Add `links` to the project field definition. If `projectFields` is currently `Array`, `[Object]` or `Mixed`, the field is already stored as-is, but defining it explicitly is clearer.
 
 ```js
-// Example for Mongoose. Adapt to the actual model.
+// Adapt to the existing model.
 const ProjectFieldSchema = new Schema({
   title: { type: String, required: true },
   content: { type: [String], default: [] },
-  link: { type: String, trim: true }, // new, optional
+  // New: optional, aligned with `content` by index. "" = plain text.
+  links: { type: [String], default: undefined },
 }, { _id: false });
+
+// in the project schema
+projectFields: { type: [ProjectFieldSchema], default: [] },
 ```
 
-If the collection is schemaless and documents are edited directly in the database, no model change is needed.
+`default: undefined` keeps Mongoose from adding `links: []` to every field. Either way works for the frontend.
 
-### 2. API response
-Check that `GET /api/projects/name/:nameId` returns `current.projectFields[].link`. Look for anything that would strip it:
+### 3. Make sure the detail API returns it
+
+`GET /api/projects/name/:nameId` must include `current.projectFields[].links` unchanged. Check for anything that would drop it:
+
 - a `.select(...)` / projection that lists fields explicitly
-- a DTO, serializer or mapper that rebuilds `projectFields` with only `title` and `content`
-- response validation or whitelisting
+- a mapper/DTO that rebuilds `projectFields` with only `title` and `content`
+- `.lean()` is fine, it returns the stored document as-is
 
-### 3. Validation on write (recommended)
-Wherever project fields are created or updated (admin endpoint, CMS, seed script):
-- accept `link` only if it is empty or matches `^https?://`
-- trim whitespace
-- store an empty value as missing (or `""`). The frontend treats both as no link.
+`previous`, `next` and `GET /api/projects/enabled` don't need to change.
 
-The frontend also ignores anything that isn't `http(s)`, so this is defense in depth, not a hard requirement.
+### 4. Validate on write (recommended)
 
-### 4. Admin / CMS input (if there is one)
-Add an optional "Link" input next to each project field's title/content inputs.
+In every route or script that creates or updates projects:
+
+- if `links` is present, it must be an array of strings with `links.length <= content.length`
+- trim each entry
+- each entry must be `""` or match `/^https?:\/\//i`; reject (400) otherwise
+- never filter out empty entries (see rule 3)
+
+The frontend also ignores non-http(s) values, so this is defense in depth, not a blocker.
+
+### 5. Admin / CMS (if there is one)
+
+Add an optional URL input next to **each value** of a project field. Build `links` in the same order as `content` on save. When a value is reordered or removed, move or remove its link with it.
 
 ## Migration
 
-None needed. Existing documents without `link` keep working unchanged.
+None. Existing documents without `links` keep working, and the frontend renders them as plain text.
 
-## Testing checklist
+## Acceptance criteria
 
-- [ ] Add `link` to one field of one test project (e.g. a "Website" field).
-- [ ] `curl <PROXY_ENDPOINT>/api/projects/name/<nameId>` shows `link` under `current.projectFields`.
-- [ ] Saving or updating that project through the backend keeps `link`.
-- [ ] Projects without `link` return the same response as before.
-- [ ] On the site, the field's value is clickable and opens the URL in a new tab, on desktop and on mobile (below 1024px).
-- [ ] A non-http value (e.g. `javascript:alert(1)` or `www.example.com`) is rejected by validation, or at least renders as plain text.
+- [ ] Schema accepts `projectFields[].links` as an optional string array.
+- [ ] Adding `links` to a field (directly in MongoDB or through the admin) survives a save/update round trip, with empty entries and order kept.
+- [ ] `curl "$PROXY_ENDPOINT/api/projects/name/<nameId>"` shows `links` under `current.projectFields`.
+- [ ] Projects without `links` return exactly the same response as before.
+- [ ] (If validation added) `links` longer than `content`, or an entry like `javascript:alert(1)` / `www.example.com`, is rejected.
+- [ ] End to end: with the frontend branch deployed, each value that has a URL is clickable and opens in a new tab, on desktop and mobile; other values stay plain text.
 
-## Frontend reference (already implemented, for context)
+## Quick manual test
 
-- `src/model/ProjectField.ts`: `{ title: string, content: string[], link?: string }`
+Pick a project, e.g. `Luxe`, and in MongoDB set its `DESIGNERS` field to:
+
+```json
+{
+  "title": "DESIGNERS",
+  "content": ["Buun Ngo", "Hung Le"],
+  "links": ["https://example.com", ""]
+}
+```
+
+Then:
+
+```bash
+curl -s "$PROXY_ENDPOINT/api/projects/name/Luxe" | jq '.current.projectFields'
+```
+
+The `DESIGNERS` entry should include the `links` array. Remove the test link afterwards if it shouldn't go live.
+
+## Frontend reference (repo `achild-of-river-UI`, already implemented)
+
+- `src/model/ProjectField.ts`: `{ title: string, content: string[], links?: string[] }`
 - `src/common/CommonLogic.ts`: `getSafeLink()` allows only `http(s)` URLs
-- `src/app/[projectNameId]/ProjectDetail.tsx`: `renderProjectFieldValue()` wraps values in `<a target="_blank" rel="noopener noreferrer">` when the link is valid
+- `src/app/[projectNameId]/ProjectDetail.tsx`: `renderProjectFieldValue()` wraps `content[i]` in `<a target="_blank" rel="noopener noreferrer">` when `links[i]` is a valid URL

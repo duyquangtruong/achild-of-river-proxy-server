@@ -287,10 +287,12 @@ module.exports = {
         properties: {
           title: { type: "string" },
           content: { type: "array", items: { type: "string" } },
-          link: {
-            type: "string",
-            description: "Optional. Full URL starting with http:// or https://. When set, every content line links to it.",
-            example: "https://ahalfprice.com",
+          links: {
+            type: "array",
+            items: { type: "string" },
+            description:
+              "Optional. links[i] is the URL for content[i]. Each entry is \"\" (plain text) or a URL starting with http:// or https://. Must not be longer than content.",
+            example: ["https://example.com/buun-ngo", ""],
           },
         },
       },
