@@ -69,7 +69,7 @@ const updateProject = async (nameId, updateData) => {
     return Project.findOneAndUpdate(
         { nameId: nameId }, // Find by nameId
         { $set: updateData }, // Update fields
-        { new: true } // Return the updated document
+        { new: true, runValidators: true } // Return the updated document and validate it
     );
 };
 
