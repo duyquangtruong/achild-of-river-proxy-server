@@ -4,8 +4,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors')
-var swaggerUi = require('swagger-ui-express');
-var swaggerSpec = require('./docs/swagger');
 
 const connectDB = require("./config/db");
 
@@ -31,8 +29,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Connect to MongoDB
 connectDB();
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.get('/api-docs.json', function (req, res) { res.json(swaggerSpec); });
 app.use('/', indexRouter);
 app.use("/api/projects", projectRouter);
 app.use("/api/introMedia", introMediaRouter);
